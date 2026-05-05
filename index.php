@@ -121,7 +121,7 @@
         <form action="registro.php" method="POST">
             <div class="form-group">
                 <label>Nombre Completo</label>
-                <input type="text" name="nombre" placeholder="Ej. Alessandro Garcia" required>
+                <input type="text" name="nombre" placeholder="Escribe tu nombre completo" required>
             </div>
             <div class="form-group">
                 <label>Teléfono o WhatsApp</label>
