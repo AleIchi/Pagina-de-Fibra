@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>IPTV Samsung</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SPLASH SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-splash" class="screen active">
+    <div class="splash-content">
+        <div class="splash-logo">
+            <span class="logo-icon">▶</span>
+            <span class="logo-text">IPTV <strong>Samsung</strong></span>
+        </div>
+        <div class="splash-loader">
+            <div class="loader-bar"><div class="loader-fill"></div></div>
+            <p class="loader-text">Iniciando...</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETUP SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-setup" class="screen">
+    <div class="setup-container">
+        <div class="setup-header">
+            <span class="logo-icon">▶</span>
+            <span class="logo-text">IPTV <strong>Samsung</strong></span>
+        </div>
+        <div class="setup-tabs">
+            <button class="tab-btn active" data-tab="m3u" id="tab-m3u">
+                <span class="tab-icon">📋</span>
+                Lista M3U
+            </button>
+            <button class="tab-btn" data-tab="xtream" id="tab-xtream">
+                <span class="tab-icon">🔑</span>
+                Xtream Codes
+            </button>
+        </div>
+
+        <!-- M3U Panel -->
+        <div class="tab-panel active" id="panel-m3u">
+            <div class="form-group">
+                <label>URL de la lista M3U</label>
+                <div class="input-wrapper">
+                    <input type="text" id="m3u-url" placeholder="http://ejemplo.com/lista.m3u" class="tv-input" autocomplete="off">
+                </div>
+                <p class="input-hint">Ingresa la URL completa de tu lista M3U o M3U8</p>
+            </div>
+        </div>
+
+        <!-- Xtream Panel -->
+        <div class="tab-panel" id="panel-xtream">
+            <div class="form-group">
+                <label>Servidor</label>
+                <div class="input-wrapper">
+                    <input type="text" id="xtream-server" placeholder="http://servidor.com:8080" class="tv-input" autocomplete="off">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Usuario</label>
+                <div class="input-wrapper">
+                    <input type="text" id="xtream-user" placeholder="tu_usuario" class="tv-input" autocomplete="off">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <div class="input-wrapper">
+                    <input type="password" id="xtream-pass" placeholder="••••••••" class="tv-input" autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+        <div class="setup-actions">
+            <button class="btn-connect" id="btn-connect">
+                <span>Conectar</span>
+            </button>
+        </div>
+
+        <div class="setup-status" id="setup-status"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-main" class="screen">
+
+    <!-- Header Bar -->
+    <div class="main-header">
+        <div class="header-logo">
+            <span class="logo-icon-sm">▶</span>
+            <span>IPTV Samsung</span>
+        </div>
+        <div class="header-search" id="header-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar canal..." class="search-field" autocomplete="off">
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" id="btn-settings" title="Ajustes">⚙</button>
+            <div class="header-time" id="header-time"></div>
+        </div>
+    </div>
+
+    <div class="main-body">
+
+        <!-- Sidebar: Categories -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">Categorías</div>
+            <ul class="category-list" id="category-list">
+                <!-- populated by JS -->
+            </ul>
+        </div>
+
+        <!-- Channel List -->
+        <div class="channel-panel" id="channel-panel">
+            <div class="channel-count" id="channel-count"></div>
+            <ul class="channel-list" id="channel-list">
+                <!-- populated by JS -->
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PLAYER SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-player" class="screen">
+
+    <!-- AVPlay video element -->
+    <div id="av-player" class="av-player"></div>
+    <!-- Fallback HTML5 video -->
+    <video id="html5-player" class="html5-player" preload="none"></video>
+
+    <!-- OSD Overlay (shows on key press, hides after 5s) -->
+    <div class="player-osd" id="player-osd">
+        <div class="osd-top">
+            <div class="osd-channel-info">
+                <img class="osd-logo" id="osd-logo" src="" alt="" onerror="this.style.display='none'">
+                <div class="osd-text">
+                    <div class="osd-channel-name" id="osd-channel-name"></div>
+                    <div class="osd-channel-group" id="osd-channel-group"></div>
+                </div>
+            </div>
+            <div class="osd-channel-num" id="osd-channel-num"></div>
+        </div>
+        <div class="osd-status" id="osd-status">
+            <span class="status-dot live"></span> EN VIVO
+        </div>
+        <div class="osd-hints">
+            <span>↑↓ Cambiar canal</span>
+            <span>← Lista</span>
+            <span>OK Info</span>
+            <span>BACK Salir</span>
+        </div>
+    </div>
+
+    <!-- Channel list overlay (opens with LEFT key in player) -->
+    <div class="player-sidebar" id="player-sidebar">
+        <div class="ps-header">
+            <span class="logo-icon-sm">▶</span> Canales
+        </div>
+        <ul class="ps-list" id="ps-list"></ul>
+    </div>
+
+    <!-- Error/Buffering overlay -->
+    <div class="player-message" id="player-message">
+        <div class="message-icon" id="message-icon">⟳</div>
+        <div class="message-text" id="message-text">Cargando...</div>
+        <div class="message-sub" id="message-sub"></div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-settings" class="screen">
+    <div class="settings-container">
+        <div class="settings-header">
+            <button class="back-btn" id="settings-back">← Volver</button>
+            <h1>Ajustes</h1>
+        </div>
+        <div class="settings-body">
+            <div class="settings-section">
+                <h2>Fuente de canales</h2>
+                <div class="settings-row" id="settings-source-info">
+                    <span class="settings-label">Tipo</span>
+                    <span class="settings-value" id="settings-source-type">-</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Canales cargados</span>
+                    <span class="settings-value" id="settings-channel-count">-</span>
+                </div>
+                <button class="settings-btn danger" id="btn-change-source">Cambiar fuente</button>
+            </div>
+            <div class="settings-section">
+                <h2>Caché y datos</h2>
+                <button class="settings-btn" id="btn-clear-cache">Limpiar caché</button>
+                <button class="settings-btn" id="btn-clear-favorites">Limpiar favoritos</button>
+            </div>
+            <div class="settings-section">
+                <h2>Información</h2>
+                <div class="settings-row">
+                    <span class="settings-label">Versión</span>
+                    <span class="settings-value">1.0.0</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Plataforma</span>
+                    <span class="settings-value">Samsung Tizen 3+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TOAST NOTIFICATION
+═══════════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="js/keys.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/m3u-parser.js"></script>
+<script src="js/xtream.js"></script>
+<script src="js/player.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

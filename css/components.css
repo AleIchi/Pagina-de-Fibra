@@ -1,0 +1,417 @@
+/* ══════════════════════════════════════════════════
+   IPTV Samsung - Player & Component Styles
+══════════════════════════════════════════════════ */
+
+/* ─── Player Screen ──────────────────────────────── */
+#screen-player {
+    background: #000;
+}
+
+/* AVPlay container */
+.av-player {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.html5-player {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    display: none;
+}
+
+.html5-player.active {
+    display: block;
+}
+
+/* ─── OSD Overlay ────────────────────────────────── */
+.player-osd {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    padding: 40px 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.75) 0%,
+        transparent 30%,
+        transparent 65%,
+        rgba(0,0,0,0.8) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.player-osd.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.osd-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.osd-channel-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 16px 24px;
+}
+
+.osd-logo {
+    width: 72px;
+    height: 52px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+}
+
+.osd-channel-name {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.osd-channel-group {
+    font-size: 22px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+}
+
+.osd-channel-num {
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 80px;
+    text-align: center;
+}
+
+.osd-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-dot.live {
+    background: var(--live-red);
+    animation: blink 1.2s ease infinite;
+    box-shadow: 0 0 8px var(--live-red);
+}
+
+.status-dot.buffering {
+    background: var(--warning);
+    animation: pulse 0.8s ease infinite;
+}
+
+.status-dot.error {
+    background: var(--live-red);
+}
+
+.osd-hints {
+    display: flex;
+    gap: 32px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 40px;
+    padding: 14px 28px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.osd-hints span {
+    color: rgba(255,255,255,0.55);
+    font-size: 20px;
+}
+
+/* ─── Player Sidebar Overlay ─────────────────────── */
+.player-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 420px;
+    height: 100%;
+    background: rgba(13,13,13,0.96);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.player-sidebar.open {
+    transform: translateX(0);
+}
+
+.ps-header {
+    display: flex;
+    align-items: center;
+    padding: 28px 24px;
+    font-size: 26px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+}
+
+.ps-list {
+    list-style: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.ps-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 22px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.ps-item:hover,
+.ps-item.focused {
+    background: rgba(255,255,255,0.06);
+    border-left-color: var(--accent);
+}
+
+.ps-item.playing {
+    background: var(--bg-active);
+    border-left-color: var(--accent);
+}
+
+.ps-item-logo {
+    width: 44px;
+    height: 34px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+}
+
+.ps-item-name {
+    flex: 1;
+    font-size: 22px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+}
+
+.ps-item.focused .ps-item-name,
+.ps-item.playing .ps-item-name {
+    color: var(--text-primary);
+}
+
+/* ─── Player Message Overlay (Buffering/Error) ───── */
+.player-message {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.player-message.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.message-icon {
+    font-size: 72px;
+    color: var(--accent);
+    margin-bottom: 24px;
+    animation: spin 1s linear infinite;
+}
+
+.message-icon.error {
+    color: var(--live-red);
+    animation: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.message-text {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.message-sub {
+    font-size: 22px;
+    color: var(--text-muted);
+}
+
+/* ─── Channel Number Indicator (quick change) ─────── */
+.channel-number-indicator {
+    position: fixed;
+    bottom: 80px;
+    right: 80px;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    border: 2px solid var(--accent);
+    border-radius: 16px;
+    padding: 20px 36px;
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--accent);
+    z-index: 50;
+    display: none;
+    animation: fadeInScale 0.15s ease;
+}
+
+.channel-number-indicator.show {
+    display: block;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Context Menu (Right click / Menu key) ──────── */
+.context-menu {
+    position: fixed;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    min-width: 280px;
+    z-index: 100;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    overflow: hidden;
+    display: none;
+}
+
+.context-menu.show { display: block; }
+
+.context-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+}
+
+.context-item:hover,
+.context-item.focused {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.context-item .ci-icon {
+    font-size: 22px;
+    width: 28px;
+    text-align: center;
+}
+
+.context-sep {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+}
+
+/* ─── Loading Spinner ─────────────────────────────── */
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* ─── No Results / Empty State ────────────────────── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 20px;
+    color: var(--text-muted);
+    font-size: 26px;
+}
+
+.empty-state .empty-icon {
+    font-size: 64px;
+    opacity: 0.4;
+}
+
+.empty-state p {
+    font-size: 24px;
+    text-align: center;
+}
+
+/* ─── Scrollbar virtual indicator ─────────────────── */
+.scroll-indicator {
+    position: absolute;
+    right: 4px;
+    top: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.scroll-indicator.visible { opacity: 0.5; }
+
+/* ─── Favorite star animation ─────────────────────── */
+@keyframes starPop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+.badge-fav.pop { animation: starPop 0.3s ease; }
+
+/* ─── Focus ring for accessibility ───────────────── */
+.focusable:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}

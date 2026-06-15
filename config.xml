@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://yourdomain/IPTVSamsung"
+        version="1.0.0"
+        viewmodes="fullscreen">
+
+    <tizen:application id="com.iptv.samsung"
+                       package="IPTVSams"
+                       required_version="3.0"
+                       type="webapp"/>
+
+    <content src="index.html"/>
+
+    <icon src="img/logo.png"/>
+
+    <name>IPTV Samsung</name>
+    <description>Full IPTV player for Samsung Smart TV</description>
+
+    <feature name="http://tizen.org/feature/network.internet"/>
+
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.av.playback"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
+
+    <tizen:setting screen-orientation="landscape"
+                   context-menu="disable"
+                   background-support="disable"
+                   encryption="disable"
+                   install-location="auto"
+                   hwkey-event="true"/>
+
+    <tizen:profile name="tv"/>
+</widget>
