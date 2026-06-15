@@ -85,6 +85,11 @@ const App = (() => {
 
     async function reconnectSource(creds) {
         try {
+            /* Show skeleton while loading */
+            UI.showScreen('main');
+            UI.renderSkeleton($('channel-list'), 14);
+            focusSidebar();
+
             if (creds.type === 'm3u') {
                 const result = await M3UParser.fetchAndParse(creds.data.url);
                 state.allChannels = result.channels;
@@ -97,8 +102,7 @@ const App = (() => {
             buildGroups();
             filterChannels();
             renderMain();
-            UI.showScreen('main');
-            focusSidebar();
+            _scheduleAutoRefresh(creds);
         } catch (e) {
             UI.showScreen('setup');
             initSetupScreen();
@@ -216,7 +220,21 @@ const App = (() => {
         UI.renderCategories(state.groups, catList, state.activeGroup);
         UI.renderChannels(state.filteredChannels, chanList,
             state.activeChannel ? state.activeChannel.url : '');
-        countEl.textContent = `${state.filteredChannels.length} canales`;
+        countEl.innerHTML = `<span class="channel-count-text">${state.filteredChannels.length} canales</span>`;
+
+        /* Recents row */
+        const recentsContainer = $('recents-row-container');
+        if (recentsContainer && typeof History !== 'undefined') {
+            const recentEntries = History.getRecent(8);
+            const recentChannels = recentEntries
+                .filter(e => e.type === 'live')
+                .map(e => e.channel)
+                .filter(Boolean);
+            UI.renderRecentsRow(recentsContainer, recentChannels, ch => {
+                const idx = state.filteredChannels.findIndex(c => c.url === ch.url);
+                if (idx !== -1) playChannelByIndex(idx);
+            });
+        }
 
         /* Bind click events on category items */
         catList.querySelectorAll('li').forEach(li => {
@@ -573,10 +591,11 @@ const App = (() => {
             $('search-input').focus();
         }
 
-        if (k === Keys.MENU || k === Keys.BLUE) {
+        if (k === Keys.MENU) {
             UI.showScreen('settings');
             state.focus = 'settings';
             UI.setFocus($('settings-back'));
+            _updateSleepStatus();
         }
 
         if (k === Keys.YELLOW) {

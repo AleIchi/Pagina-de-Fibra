@@ -840,3 +840,195 @@ html, body {
     color: var(--accent);
     background: rgba(14,165,233,0.1);
 }
+
+/* ══════════════════════════════════════════════════
+   PHASE 15 — UI Premium
+══════════════════════════════════════════════════ */
+
+/* ─── Skeleton loading ──────────────────────────── */
+@keyframes shimmer {
+    0%   { background-position: -900px 0; }
+    100% { background-position:  900px 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+        var(--bg-card) 25%,
+        var(--bg-hover) 50%,
+        var(--bg-card) 75%);
+    background-size: 900px 100%;
+    animation: shimmer 1.4s infinite linear;
+    border-radius: var(--radius-sm);
+}
+
+.channel-item.skeleton-item {
+    border: 2px solid transparent;
+    pointer-events: none;
+}
+
+.channel-item.skeleton-item .channel-logo-wrap,
+.channel-item.skeleton-item .channel-name,
+.channel-item.skeleton-item .channel-group {
+    background: linear-gradient(90deg,
+        var(--bg-card) 25%,
+        var(--bg-hover) 50%,
+        var(--bg-card) 75%);
+    background-size: 900px 100%;
+    animation: shimmer 1.4s infinite linear;
+    color: transparent;
+    border-radius: 6px;
+}
+
+.channel-item.skeleton-item .channel-name {
+    height: 24px;
+    width: 65%;
+    display: block;
+}
+
+.channel-item.skeleton-item .channel-group {
+    height: 18px;
+    width: 40%;
+    display: block;
+    margin-top: 6px;
+}
+
+/* ─── Enhanced channel item hover ───────────────── */
+.channel-item:hover,
+.channel-item.focused {
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(14,165,233,0.12);
+}
+
+.channel-item.playing {
+    box-shadow: 0 0 0 2px var(--accent), 0 4px 24px rgba(14,165,233,0.3);
+}
+
+/* ─── Recientes section in channel panel ────────── */
+.recents-section {
+    padding: 12px 16px 0;
+    flex-shrink: 0;
+}
+
+.recents-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    padding-left: 4px;
+}
+
+.recents-row {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 12px;
+}
+.recents-row::-webkit-scrollbar { display: none; }
+
+.recent-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 16px 8px 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    flex-shrink: 0;
+}
+
+.recent-chip:hover,
+.recent-chip.focused {
+    border-color: var(--accent);
+    background: rgba(14,165,233,0.08);
+    transform: scale(1.04);
+}
+
+.recent-chip-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.recent-chip-name {
+    font-size: 20px;
+    color: var(--text-primary);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Screen transition animations ─────────────── */
+.screen.slide-in-right {
+    animation: slideInRight 0.25s ease forwards;
+}
+.screen.slide-in-left {
+    animation: slideInLeft 0.25s ease forwards;
+}
+.screen.slide-out-right {
+    animation: slideOutRight 0.2s ease forwards;
+}
+.screen.slide-out-left {
+    animation: slideOutLeft 0.2s ease forwards;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(40px); }
+}
+@keyframes slideOutLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(-40px); }
+}
+
+/* ─── fadeIn generic ────────────────────────────── */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Category item glow ────────────────────────── */
+.category-item.active {
+    background: linear-gradient(90deg, rgba(14,165,233,0.18) 0%, transparent 100%);
+}
+
+/* ─── Channel count badge ───────────────────────── */
+.channel-count {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.channel-count-text { color: var(--text-muted); font-size: 20px; }
+.channel-count-badge {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 18px;
+    padding: 3px 14px;
+    border-radius: 20px;
+}
+
+/* ─── Toast premium ─────────────────────────────── */
+.toast {
+    backdrop-filter: blur(20px);
+    background: rgba(30,30,30,0.92);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}

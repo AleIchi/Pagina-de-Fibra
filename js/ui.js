@@ -11,10 +11,28 @@ const UI = (() => {
         });
     }
 
+    const SCREEN_ORDER = ['splash','setup','main','player','epg','favorites','history','settings'];
+
     function showScreen(name) {
         if (_currentScreen === name) return;
-        Object.values(screens).forEach(s => s.classList.remove('active'));
-        if (screens[name]) screens[name].classList.add('active');
+        const prev    = _currentScreen;
+        const prevEl  = prev && screens[prev];
+        const nextEl  = screens[name];
+        if (!nextEl) return;
+
+        const prevIdx = SCREEN_ORDER.indexOf(prev);
+        const nextIdx = SCREEN_ORDER.indexOf(name);
+        const goRight = nextIdx >= prevIdx;
+
+        Object.values(screens).forEach(s => {
+            s.classList.remove('active','slide-in-right','slide-in-left','slide-out-right','slide-out-left');
+        });
+
+        if (prevEl) {
+            prevEl.style.pointerEvents = 'none';
+        }
+
+        nextEl.classList.add('active', goRight ? 'slide-in-right' : 'slide-in-left');
         _currentScreen = name;
     }
 
@@ -58,6 +76,19 @@ const UI = (() => {
             return true;
         }
         return false;
+    }
+
+    /* ── Skeleton loading ──────────────────────────── */
+    function renderSkeleton(listEl, count = 12) {
+        listEl.innerHTML = Array.from({ length: count }, () => `
+            <li class="channel-item skeleton-item">
+                <span class="channel-num" style="opacity:0.2">--</span>
+                <div class="channel-logo-wrap"></div>
+                <div class="channel-info">
+                    <div class="channel-name"> </div>
+                    <div class="channel-group"> </div>
+                </div>
+            </li>`).join('');
     }
 
     /* ── Channel list rendering ────────────────────── */
@@ -235,6 +266,34 @@ const UI = (() => {
         document.getElementById('player-message').classList.remove('visible');
     }
 
+    /* ── Recent channels chip row ────────────────────── */
+    function renderRecentsRow(containerEl, recentChannels, onPlay) {
+        containerEl.innerHTML = '';
+        if (!recentChannels || !recentChannels.length) return;
+
+        const section = document.createElement('div');
+        section.className = 'recents-section';
+        section.innerHTML = '<div class="recents-title">Recientes</div>';
+
+        const row = document.createElement('div');
+        row.className = 'recents-row';
+
+        recentChannels.slice(0, 8).forEach(ch => {
+            const chip = document.createElement('div');
+            chip.className = 'recent-chip';
+            chip.innerHTML = `
+                ${ch.logo
+                    ? `<img class="recent-chip-logo" src="${escHtml(ch.logo)}" alt="" onerror="this.outerHTML='<div class=\\"recent-chip-logo\\" style=\\"display:flex;align-items:center;justify-content:center;font-size:14px;\\">${escHtml(ch.name.charAt(0))}</div>'">`
+                    : `<div class="recent-chip-logo" style="display:flex;align-items:center;justify-content:center;font-size:14px;">${escHtml(ch.name.charAt(0))}</div>`}
+                <span class="recent-chip-name">${escHtml(ch.name)}</span>`;
+            chip.addEventListener('click', () => onPlay(ch));
+            row.appendChild(chip);
+        });
+
+        section.appendChild(row);
+        containerEl.appendChild(section);
+    }
+
     /* ── Helpers ────────────────────────────────────── */
     function escHtml(str) {
         return String(str)
@@ -247,7 +306,8 @@ const UI = (() => {
     return {
         init, showScreen, currentScreen,
         setFocus, getFocused, clearFocus, navigateList,
-        renderChannels, renderCategories, renderPlayerSidebar,
+        renderChannels, renderSkeleton, renderCategories, renderPlayerSidebar,
+        renderRecentsRow,
         showToast, startClock,
         showOSD, hideOSD,
         showPlayerMessage, hidePlayerMessage,
