@@ -1,0 +1,384 @@
+/* ══════════════════════════════════════════════════
+   VOD (Movies) Screen
+══════════════════════════════════════════════════ */
+
+#screen-vod, #screen-vod-detail {
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.vod-header {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 32px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.vod-header h1 { font-size: 32px; font-weight: 700; }
+
+.vod-search {
+    flex: 1;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 40px;
+    padding: 0 20px;
+    gap: 10px;
+    height: 52px;
+    transition: border-color var(--transition);
+}
+
+.vod-search.focused { border-color: var(--accent); }
+.vod-search-input {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 22px;
+    flex: 1;
+    outline: none;
+    height: 100%;
+}
+.vod-search-input::placeholder { color: var(--text-muted); }
+
+.vod-sort-btn {
+    margin-left: auto;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 22px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+.vod-sort-btn.focused { border-color: var(--accent); color: var(--accent); }
+
+/* ── Body layout ─────────────────────────────────── */
+.vod-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Sidebar (categories) — reuses sidebar styles */
+.vod-sidebar {
+    width: 260px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.vod-sidebar-title {
+    padding: 20px 20px 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.vod-cat-list {
+    list-style: none;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.vod-cat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    color: var(--text-secondary);
+    font-size: 22px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background var(--transition), color var(--transition);
+}
+
+.vod-cat-item.focused, .vod-cat-item:hover {
+    background: var(--bg-hover); color: var(--text-primary);
+    border-left-color: var(--accent);
+}
+.vod-cat-item.active {
+    background: var(--bg-active); color: var(--accent);
+    border-left-color: var(--accent); font-weight: 600;
+}
+
+/* ── Movie Grid ──────────────────────────────────── */
+.vod-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.vod-count {
+    padding: 14px 20px 6px;
+    font-size: 20px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.vod-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 20px 20px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 14px;
+    align-content: start;
+}
+
+.vod-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    position: relative;
+}
+
+.vod-card.focused {
+    border-color: var(--accent);
+    transform: scale(1.05);
+    box-shadow: 0 8px 32px var(--accent-glow);
+    z-index: 2;
+}
+
+.vod-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    background: var(--bg-secondary);
+    display: block;
+}
+
+.vod-poster-placeholder {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: var(--text-muted);
+}
+
+.vod-card-info {
+    padding: 10px 10px 12px;
+}
+
+.vod-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+.vod-card-meta {
+    font-size: 16px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vod-card-rating {
+    color: #f59e0b;
+    font-size: 14px;
+}
+
+/* Continue watching overlay on poster */
+.vod-card-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+}
+.vod-card-progress-fill {
+    height: 100%;
+    background: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════
+   VOD DETAIL SCREEN
+═══════════════════════════════════════════════════ */
+
+.vod-detail-header {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 32px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.vod-detail-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    padding: 40px 52px;
+    gap: 52px;
+}
+
+/* Left: poster */
+.vod-detail-poster-wrap {
+    flex-shrink: 0;
+    width: 300px;
+}
+
+.vod-detail-poster {
+    width: 300px;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.vod-detail-poster-ph {
+    width: 300px;
+    aspect-ratio: 2/3;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+/* Right: info */
+.vod-detail-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.vod-detail-title {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.vod-detail-badges {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.vod-badge {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 20px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vod-badge.rating { color: #f59e0b; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
+
+.vod-detail-desc {
+    font-size: 22px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.vod-detail-cast {
+    font-size: 20px;
+    color: var(--text-muted);
+}
+
+/* Progress if continue watching */
+.vod-detail-progress {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+}
+
+.vod-detail-progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.vod-detail-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+}
+
+.vod-detail-progress-text {
+    font-size: 20px;
+    color: var(--text-muted);
+}
+
+/* Action buttons */
+.vod-detail-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.vod-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 32px;
+    border-radius: var(--radius-sm);
+    font-size: 24px;
+    font-weight: 600;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.vod-action-btn.primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.vod-action-btn.primary.focused {
+    background: var(--accent-hover);
+    transform: scale(1.04);
+}
+
+.vod-action-btn.secondary {
+    background: var(--bg-card);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+.vod-action-btn.secondary.focused {
+    border-color: var(--accent);
+    color: var(--accent);
+}

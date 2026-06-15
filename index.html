@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>IPTV Samsung</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/epg.css">
+    <link rel="stylesheet" href="css/favorites.css">
+    <link rel="stylesheet" href="css/history.css">
+    <link rel="stylesheet" href="css/mini-player.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SPLASH SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-splash" class="screen active">
+    <div class="splash-content">
+        <div class="splash-logo">
+            <span class="logo-icon">▶</span>
+            <span class="logo-text">IPTV <strong>Samsung</strong></span>
+        </div>
+        <div class="splash-loader">
+            <div class="loader-bar"><div class="loader-fill"></div></div>
+            <p class="loader-text">Iniciando...</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETUP SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-setup" class="screen">
+    <div class="setup-container">
+        <div class="setup-header">
+            <span class="logo-icon">▶</span>
+            <span class="logo-text">IPTV <strong>Samsung</strong></span>
+        </div>
+        <div class="setup-tabs">
+            <button class="tab-btn active" data-tab="m3u" id="tab-m3u">
+                <span class="tab-icon">📋</span>
+                Lista M3U
+            </button>
+            <button class="tab-btn" data-tab="xtream" id="tab-xtream">
+                <span class="tab-icon">🔑</span>
+                Xtream Codes
+            </button>
+        </div>
+
+        <!-- M3U Panel -->
+        <div class="tab-panel active" id="panel-m3u">
+            <div class="form-group">
+                <label>URL de la lista M3U</label>
+                <div class="input-wrapper">
+                    <input type="text" id="m3u-url" placeholder="http://ejemplo.com/lista.m3u" class="tv-input" autocomplete="off">
+                </div>
+                <p class="input-hint">Ingresa la URL completa de tu lista M3U o M3U8</p>
+            </div>
+            <div class="form-group">
+                <label>URL Guía EPG — XMLTV <span style="font-weight:400;color:var(--text-muted);font-size:0.8em">(opcional)</span></label>
+                <div class="input-wrapper">
+                    <input type="text" id="m3u-epg-url" placeholder="http://ejemplo.com/epg.xml" class="tv-input" autocomplete="off">
+                </div>
+                <p class="input-hint">Si tu lista incluye x-tvg-url se detecta automáticamente</p>
+            </div>
+        </div>
+
+        <!-- Xtream Panel -->
+        <div class="tab-panel" id="panel-xtream">
+            <div class="form-group">
+                <label>Servidor</label>
+                <div class="input-wrapper">
+                    <input type="text" id="xtream-server" placeholder="http://servidor.com:8080" class="tv-input" autocomplete="off">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Usuario</label>
+                <div class="input-wrapper">
+                    <input type="text" id="xtream-user" placeholder="tu_usuario" class="tv-input" autocomplete="off">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <div class="input-wrapper">
+                    <input type="password" id="xtream-pass" placeholder="••••••••" class="tv-input" autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+        <div class="setup-actions">
+            <button class="btn-connect" id="btn-connect">
+                <span>Conectar</span>
+            </button>
+        </div>
+
+        <div class="setup-status" id="setup-status"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-main" class="screen">
+
+    <!-- Header Bar -->
+    <div class="main-header">
+        <div class="header-logo">
+            <span class="logo-icon-sm">▶</span>
+            <span>IPTV</span>
+        </div>
+        <nav class="header-nav" id="header-nav">
+            <button class="nav-btn active" data-screen="channels"  id="nav-channels">📺 Canales</button>
+            <button class="nav-btn" data-screen="epg"              id="nav-epg">📅 Guía TV</button>
+            <button class="nav-btn" data-screen="favorites"        id="nav-favorites">★ Favoritos</button>
+            <button class="nav-btn" data-screen="history"          id="nav-history">🕐 Historial</button>
+        </nav>
+        <div class="header-search" id="header-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar canal..." class="search-field" autocomplete="off">
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" id="btn-settings" title="Ajustes">⚙</button>
+            <div class="header-time" id="header-time"></div>
+        </div>
+    </div>
+
+    <div class="main-body">
+
+        <!-- Sidebar: Categories -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">Categorías</div>
+            <ul class="category-list" id="category-list">
+                <!-- populated by JS -->
+            </ul>
+        </div>
+
+        <!-- Channel List -->
+        <div class="channel-panel" id="channel-panel">
+            <div class="channel-count" id="channel-count"></div>
+            <div id="recents-row-container"></div>
+            <ul class="channel-list" id="channel-list">
+                <!-- populated by JS -->
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PLAYER SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-player" class="screen">
+
+    <!-- AVPlay video element -->
+    <div id="av-player" class="av-player"></div>
+    <!-- Fallback HTML5 video -->
+    <video id="html5-player" class="html5-player" preload="none"></video>
+
+    <!-- OSD Overlay (shows on key press, hides after 5s) -->
+    <div class="player-osd" id="player-osd">
+        <div class="osd-top">
+            <div class="osd-channel-info">
+                <img class="osd-logo" id="osd-logo" src="" alt="" onerror="this.style.display='none'">
+                <div class="osd-text">
+                    <div class="osd-channel-name" id="osd-channel-name"></div>
+                    <div class="osd-channel-group" id="osd-channel-group"></div>
+                </div>
+            </div>
+            <div class="osd-channel-num" id="osd-channel-num"></div>
+        </div>
+        <div class="osd-epg-info" id="osd-epg-info">
+            <div class="osd-epg-current">
+                <span class="epg-prog-label">AHORA</span>
+                <span class="osd-prog-title" id="osd-prog-title">-</span>
+                <div class="osd-prog-bar-wrap">
+                    <div class="osd-prog-bar" id="osd-prog-bar"></div>
+                </div>
+            </div>
+            <div class="osd-epg-next">
+                <span class="epg-prog-label">DESPUÉS</span>
+                <span class="osd-next-title" id="osd-next-title">-</span>
+            </div>
+        </div>
+        <div class="osd-status" id="osd-status">
+            <span class="status-dot live"></span> EN VIVO
+        </div>
+        <div class="osd-hints">
+            <span>↑↓ Canal</span>
+            <span>← Lista</span>
+            <span>🟢 Fav</span>
+            <span>🔴 Audio</span>
+            <span>🔵 Subs</span>
+            <span>🟡 EPG</span>
+            <span>MENÚ Aspecto</span>
+            <span>BACK Mini</span>
+        </div>
+    </div>
+
+    <!-- Channel list overlay (opens with LEFT key in player) -->
+    <div class="player-sidebar" id="player-sidebar">
+        <div class="ps-header">
+            <span class="logo-icon-sm">▶</span> Canales
+        </div>
+        <ul class="ps-list" id="ps-list"></ul>
+    </div>
+
+    <!-- Error/Buffering overlay -->
+    <div class="player-message" id="player-message">
+        <div class="message-icon" id="message-icon">⟳</div>
+        <div class="message-text" id="message-text">Cargando...</div>
+        <div class="message-sub" id="message-sub"></div>
+    </div>
+
+    <div class="channel-number-indicator" id="channel-number-indicator"></div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-settings" class="screen">
+    <div class="settings-container">
+        <div class="settings-header">
+            <button class="back-btn" id="settings-back">← Volver</button>
+            <h1>Ajustes</h1>
+        </div>
+        <div class="settings-body">
+            <div class="settings-section">
+                <h2>Fuente de canales</h2>
+                <div class="settings-row" id="settings-source-info">
+                    <span class="settings-label">Tipo</span>
+                    <span class="settings-value" id="settings-source-type">-</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Canales cargados</span>
+                    <span class="settings-value" id="settings-channel-count">-</span>
+                </div>
+                <button class="settings-btn danger" id="btn-change-source">Cambiar fuente</button>
+            </div>
+            <div class="settings-section">
+                <h2>Reproducción</h2>
+                <div class="settings-row">
+                    <span class="settings-label">Temporizador de apagado</span>
+                    <span class="settings-value" id="settings-sleep-status">Desactivado</span>
+                </div>
+                <button class="settings-btn" id="btn-sleep-timer">⏱ Configurar temporizador</button>
+                <div class="settings-row">
+                    <span class="settings-label">Relación de aspecto</span>
+                    <span class="settings-value">MENÚ en reproductor para ciclar</span>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h2>Actualización automática</h2>
+                <div class="settings-row">
+                    <span class="settings-label">Intervalo</span>
+                    <span class="settings-value" id="settings-refresh-label">Manual</span>
+                </div>
+                <div class="settings-refresh-btns" id="settings-refresh-btns">
+                    <button class="settings-refresh-opt active" data-h="0">Manual</button>
+                    <button class="settings-refresh-opt" data-h="6">6 horas</button>
+                    <button class="settings-refresh-opt" data-h="12">12 horas</button>
+                    <button class="settings-refresh-opt" data-h="24">24 horas</button>
+                </div>
+                <button class="settings-btn" id="btn-refresh-now">↻ Actualizar ahora</button>
+            </div>
+            <div class="settings-section">
+                <h2>Caché y datos</h2>
+                <button class="settings-btn" id="btn-clear-cache">Limpiar caché</button>
+                <button class="settings-btn" id="btn-clear-favorites">Limpiar favoritos</button>
+            </div>
+            <div class="settings-section">
+                <h2>Información</h2>
+                <div class="settings-row">
+                    <span class="settings-label">Versión</span>
+                    <span class="settings-value">1.0.0</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Plataforma</span>
+                    <span class="settings-value">Samsung Tizen 3+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     EPG SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-epg" class="screen">
+  <div class="epg-header">
+    <button class="epg-back-btn" id="epg-back">← Volver</button>
+    <h1 class="epg-title">Guía de Programación</h1>
+    <div class="epg-date-nav">
+      <button class="epg-date-btn" id="epg-prev-day">◀ Ayer</button>
+      <span class="epg-current-date" id="epg-current-date"></span>
+      <button class="epg-date-btn" id="epg-next-day">Mañana ▶</button>
+    </div>
+    <div class="epg-legend">
+      <span class="legend-item current">■ Ahora</span>
+      <span class="legend-item future">■ Próximo</span>
+      <span class="legend-item past">■ Pasado</span>
+    </div>
+  </div>
+  <div class="epg-body">
+    <div class="epg-grid-wrap" id="epg-grid-wrap">
+      <!-- populated by EPGGrid -->
+    </div>
+  </div>
+  <!-- Program detail tooltip -->
+  <div class="epg-detail" id="epg-detail">
+    <div class="epg-detail-icon" id="epg-detail-icon"></div>
+    <div class="epg-detail-info">
+      <div class="epg-detail-title" id="epg-detail-title"></div>
+      <div class="epg-detail-time" id="epg-detail-time"></div>
+      <div class="epg-detail-desc" id="epg-detail-desc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     FAVORITES SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-favorites" class="screen">
+    <div class="fav-header">
+        <button class="back-btn" id="fav-back">← Volver</button>
+        <h1>Favoritos</h1>
+        <span class="fav-count" id="fav-count">0</span>
+        <div class="fav-toolbar">
+            <button class="fav-btn" id="fav-view-list" title="Vista lista">☰ Lista</button>
+            <button class="fav-btn active" id="fav-view-grid" title="Vista cuadrícula">⊞ Cuadrícula</button>
+        </div>
+    </div>
+    <div class="fav-body">
+        <div class="fav-sidebar">
+            <div class="fav-sidebar-title">Carpetas</div>
+            <ul class="fav-folders" id="fav-folders"></ul>
+        </div>
+        <div class="fav-panel">
+            <div id="fav-channel-container" class="fav-grid"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     HISTORY SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-history" class="screen">
+    <div class="hist-header">
+        <button class="back-btn" id="hist-back">← Volver</button>
+        <h1>Historial</h1>
+        <div class="hist-toolbar">
+            <button class="hist-filter-btn active" data-filter="all">Todos</button>
+            <button class="hist-filter-btn" data-filter="live">Canales</button>
+            <button class="hist-filter-btn" data-filter="vod">Películas</button>
+            <button class="hist-filter-btn" data-filter="series">Series</button>
+            <button class="hist-clear-btn" id="hist-clear">Limpiar</button>
+        </div>
+    </div>
+    <div class="hist-body" id="hist-body"></div>
+    <div class="hist-stats" id="hist-stats"></div>
+</div>
+
+<!-- Mini Player -->
+<div id="mini-player-mount"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TOAST NOTIFICATION
+═══════════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="js/keys.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/m3u-parser.js"></script>
+<script src="js/xtream.js"></script>
+<script src="js/player.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/epg.js"></script>
+<script src="js/epg-grid.js"></script>
+<script src="js/favorites.js"></script>
+<script src="js/history.js"></script>
+<script src="js/mini-player.js"></script>
+<script src="js/tracks.js"></script>
+<script src="js/player-extras.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
