@@ -416,6 +416,39 @@ html, body {
 
 .search-field::placeholder { color: var(--text-muted); }
 
+/* Header nav tabs */
+.header-nav {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-muted);
+    font-size: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--transition), border-color var(--transition), background var(--transition);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.nav-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(14,165,233,0.07);
+}
+
+.nav-btn.focused,
+.nav-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+}
+
 .header-actions {
     display: flex;
     align-items: center;
