@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="css/favorites.css">
     <link rel="stylesheet" href="css/history.css">
     <link rel="stylesheet" href="css/mini-player.css">
-    <link rel="stylesheet" href="css/vod.css">
-    <link rel="stylesheet" href="css/series.css">
 </head>
 <body>
 
@@ -106,12 +104,10 @@
             <span>IPTV</span>
         </div>
         <nav class="header-nav" id="header-nav">
-            <button class="nav-btn active" data-screen="channels" id="nav-channels">📺 Canales</button>
-            <button class="nav-btn" data-screen="vod"      id="nav-vod">🎬 Películas</button>
-            <button class="nav-btn" data-screen="series"   id="nav-series">📂 Series</button>
-            <button class="nav-btn" data-screen="epg"      id="nav-epg">📅 Guía TV</button>
-            <button class="nav-btn" data-screen="favorites" id="nav-favorites">★ Favoritos</button>
-            <button class="nav-btn" data-screen="history"  id="nav-history">🕐 Historial</button>
+            <button class="nav-btn active" data-screen="channels"  id="nav-channels">📺 Canales</button>
+            <button class="nav-btn" data-screen="epg"              id="nav-epg">📅 Guía TV</button>
+            <button class="nav-btn" data-screen="favorites"        id="nav-favorites">★ Favoritos</button>
+            <button class="nav-btn" data-screen="history"          id="nav-history">🕐 Historial</button>
         </nav>
         <div class="header-search" id="header-search">
             <span class="search-icon">🔍</span>
@@ -328,85 +324,6 @@
     <div class="hist-stats" id="hist-stats"></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     VOD SCREEN (Movies)
-═══════════════════════════════════════════════════════ -->
-<div id="screen-vod" class="screen">
-    <div class="vod-header">
-        <button class="back-btn" id="vod-back">← Volver</button>
-        <h1>Películas</h1>
-        <div class="vod-search" id="vod-search">
-            <span>🔍</span>
-            <input type="text" id="vod-search-input" class="vod-search-input" placeholder="Buscar película..." autocomplete="off">
-        </div>
-        <button class="vod-sort-btn" id="vod-sort">⇅ Ordenar</button>
-    </div>
-    <div class="vod-body">
-        <div class="vod-sidebar">
-            <div class="vod-sidebar-title">Categorías</div>
-            <ul class="vod-cat-list" id="vod-cat-list"></ul>
-        </div>
-        <div class="vod-panel">
-            <div class="vod-count" id="vod-count"></div>
-            <div class="vod-grid" id="vod-grid"></div>
-        </div>
-    </div>
-</div>
-
-<!-- VOD Detail -->
-<div id="screen-vod-detail" class="screen">
-    <div class="vod-detail-header">
-        <button class="back-btn" id="vod-detail-back">← Películas</button>
-        <h1 id="vod-detail-header-title">Detalle</h1>
-    </div>
-    <div id="vod-detail-body"></div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════
-     SERIES SCREEN
-═══════════════════════════════════════════════════════ -->
-<div id="screen-series" class="screen">
-    <div class="series-header">
-        <button class="back-btn" id="series-back">← Volver</button>
-        <h1>Series</h1>
-        <div class="vod-search" id="series-search-wrap">
-            <span>🔍</span>
-            <input type="text" id="series-search-input" class="vod-search-input" placeholder="Buscar serie..." autocomplete="off">
-        </div>
-    </div>
-    <div class="series-body">
-        <div class="series-sidebar">
-            <div class="series-sidebar-title">Categorías</div>
-            <ul class="series-cat-list" id="series-cat-list"></ul>
-        </div>
-        <div class="series-panel">
-            <div class="vod-count" id="series-count"></div>
-            <div class="series-grid" id="series-grid"></div>
-        </div>
-    </div>
-</div>
-
-<!-- Series Detail -->
-<div id="screen-series-detail" class="screen">
-    <div class="series-detail-header">
-        <button class="back-btn" id="series-detail-back">← Series</button>
-        <h1 id="series-detail-header-title">Detalle</h1>
-    </div>
-    <div id="series-detail-body"></div>
-</div>
-
-<!-- Next Episode Overlay -->
-<div class="next-episode-overlay" id="next-episode-overlay">
-    <div class="next-ep-label">A continuación</div>
-    <div class="next-ep-title" id="next-ep-title"></div>
-    <div class="next-ep-countdown" id="next-ep-countdown"></div>
-    <div class="next-ep-bar"><div class="next-ep-bar-fill" id="next-ep-bar-fill" style="width:100%"></div></div>
-    <div class="next-ep-actions">
-        <button class="next-ep-btn primary" id="next-ep-play">▶ Reproducir ahora</button>
-        <button class="next-ep-btn" id="next-ep-cancel">✕ Cancelar</button>
-    </div>
-</div>
-
 <!-- Mini Player -->
 <div id="mini-player-mount"></div>
 
@@ -427,8 +344,6 @@
 <script src="js/favorites.js"></script>
 <script src="js/history.js"></script>
 <script src="js/mini-player.js"></script>
-<script src="js/vod.js"></script>
-<script src="js/series.js"></script>
 <script src="js/app.js"></script>
 
 </body>

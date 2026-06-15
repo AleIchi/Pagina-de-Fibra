@@ -799,188 +799,6 @@ const App = (() => {
     }
 
     /* ══════════════════════════════════════════════════
-       VOD SCREEN
-    ══════════════════════════════════════════════════ */
-    let _vodCategory = '__all__';
-    let _vodSearch   = '';
-
-    async function openVODScreen() {
-        UI.showScreen('vod');
-        state.focus = 'vod';
-        $('vod-back').onclick = () => { UI.showScreen('main'); state.focus = 'sidebar'; };
-
-        if (!VOD.hasCredentials()) {
-            const creds = Storage.getCredentials();
-            if (creds && creds.type === 'xtream') {
-                VOD.setCredentials(creds.data.server, creds.data.user, creds.data.pass);
-            } else { UI.showToast('VOD requiere Xtream Codes'); return; }
-        }
-
-        UI.showPlayerMessage('⟳', 'Cargando películas...', '', false);
-        try {
-            await Promise.all([ VOD.loadCategories(), VOD.loadMovies() ]);
-            UI.hidePlayerMessage();
-            _renderVODCategories();
-            _renderVODGrid();
-        } catch(e) {
-            UI.hidePlayerMessage();
-            UI.showToast('Error al cargar películas: ' + e.message, 4000);
-        }
-
-        $('vod-search-input').addEventListener('input', e => {
-            _vodSearch = e.target.value;
-            _renderVODGrid();
-        });
-    }
-
-    function _renderVODCategories() {
-        const ul = $('vod-cat-list');
-        ul.innerHTML = '<li class="vod-cat-item active" data-cat="__all__">📋 Todas</li>';
-        VOD.getCategories().forEach(c => {
-            const li = document.createElement('li');
-            li.className    = 'vod-cat-item';
-            li.dataset.cat  = c.category_id;
-            li.tabIndex     = 0;
-            li.textContent  = c.category_name;
-            li.addEventListener('click', () => {
-                _vodCategory = c.category_id;
-                ul.querySelectorAll('li').forEach(l => l.classList.toggle('active', l.dataset.cat === _vodCategory));
-                _renderVODGrid();
-            });
-            ul.appendChild(li);
-        });
-        ul.querySelector('li').addEventListener('click', () => {
-            _vodCategory = '__all__';
-            ul.querySelectorAll('li').forEach(l => l.classList.toggle('active', l.dataset.cat === '__all__'));
-            _renderVODGrid();
-        });
-    }
-
-    function _renderVODGrid() {
-        const movies = VOD.getMovies(_vodCategory === '__all__' ? null : _vodCategory, _vodSearch);
-        $('vod-count').textContent = `${movies.length} películas`;
-        VOD.renderGrid($('vod-grid'), movies, '',
-            m => _openVODPlayer(m),
-            m => _openVODDetail(m)
-        );
-    }
-
-    async function _openVODDetail(movie) {
-        UI.showScreen('vod-detail');
-        $('vod-detail-header-title').textContent = movie.name;
-        $('vod-detail-back').onclick = () => UI.showScreen('vod');
-        const info = await VOD.getMovieInfo(movie.id).catch(() => null);
-        VOD.renderDetail(movie, info, $('vod-detail-body'),
-            m => _openVODPlayer(m),
-            () => UI.showScreen('vod')
-        );
-    }
-
-    function _openVODPlayer(movie) {
-        const url = movie.url || VOD.buildStreamUrl(movie);
-        const ch  = { name: movie.name, logo: movie.poster || '', url, group: 'Películas' };
-        History.addEntry({ type: 'vod', name: movie.name, logo: movie.poster || '', url, group: 'Películas' });
-        Player.play(ch);
-        UI.showScreen('player');
-        state.focus    = 'player';
-        state.activeChannel = ch;
-        UI.showOSD(ch, 0);
-    }
-
-    /* ══════════════════════════════════════════════════
-       SERIES SCREEN
-    ══════════════════════════════════════════════════ */
-    let _seriesCategory   = '__all__';
-    let _seriesSearch     = '';
-    let _currentSeries    = null;
-    let _currentEpisodes  = [];
-    let _currentEpIdx     = 0;
-
-    async function openSeriesScreen() {
-        UI.showScreen('series');
-        state.focus = 'series';
-        $('series-back').onclick = () => { UI.showScreen('main'); state.focus = 'sidebar'; };
-
-        if (!Series.hasCredentials()) {
-            const creds = Storage.getCredentials();
-            if (creds && creds.type === 'xtream') {
-                Series.setCredentials(creds.data.server, creds.data.user, creds.data.pass);
-            } else { UI.showToast('Series requiere Xtream Codes'); return; }
-        }
-
-        UI.showPlayerMessage('⟳', 'Cargando series...', '', false);
-        try {
-            await Promise.all([ Series.loadCategories(), Series.loadSeries() ]);
-            UI.hidePlayerMessage();
-            _renderSeriesCategories();
-            _renderSeriesGrid();
-        } catch(e) {
-            UI.hidePlayerMessage();
-            UI.showToast('Error al cargar series: ' + e.message, 4000);
-        }
-
-        $('series-search-input').addEventListener('input', e => {
-            _seriesSearch = e.target.value;
-            _renderSeriesGrid();
-        });
-    }
-
-    function _renderSeriesCategories() {
-        const ul = $('series-cat-list');
-        ul.innerHTML = '<li class="series-cat-item active" data-cat="__all__">📋 Todas</li>';
-        Series.getCategories().forEach(c => {
-            const li = document.createElement('li');
-            li.className   = 'series-cat-item';
-            li.dataset.cat = c.category_id;
-            li.tabIndex    = 0;
-            li.textContent = c.category_name;
-            li.addEventListener('click', () => {
-                _seriesCategory = c.category_id;
-                ul.querySelectorAll('li').forEach(l => l.classList.toggle('active', l.dataset.cat === _seriesCategory));
-                _renderSeriesGrid();
-            });
-            ul.appendChild(li);
-        });
-    }
-
-    function _renderSeriesGrid() {
-        const list = Series.getSeriesList(_seriesCategory === '__all__' ? null : _seriesCategory, _seriesSearch);
-        $('series-count').textContent = `${list.length} series`;
-        Series.renderGrid($('series-grid'), list, s => _openSeriesDetail(s));
-    }
-
-    async function _openSeriesDetail(series) {
-        _currentSeries = series;
-        UI.showScreen('series-detail');
-        $('series-detail-header-title').textContent = series.name;
-        $('series-detail-back').onclick = () => UI.showScreen('series');
-
-        UI.showPlayerMessage('⟳', 'Cargando episodios...', '', false);
-        try {
-            const info = await Series.getSeriesInfo(series.id);
-            UI.hidePlayerMessage();
-            Series.renderDetail(series, info, $('series-detail-body'),
-                (ep, epIdx, savedPos) => _openEpisodePlayer(ep, epIdx, savedPos, info),
-                () => UI.showScreen('series')
-            );
-        } catch(e) {
-            UI.hidePlayerMessage();
-            UI.showToast('Error al cargar detalles: ' + e.message);
-        }
-    }
-
-    function _openEpisodePlayer(ep, epIdx, savedPos, seriesInfo) {
-        _currentEpIdx = epIdx;
-        const ch = { name: `${_currentSeries.name} - ${ep.title}`, logo: _currentSeries.poster || '', url: ep.url, group: 'Series' };
-        History.addEntry({ type: 'series', name: ch.name, logo: ch.logo, url: ep.url, group: 'Series', meta: `T${ep.seasonNum}E${ep.episodeNum}` });
-        Player.play(ch);
-        UI.showScreen('player');
-        state.focus    = 'player';
-        state.activeChannel = ch;
-        UI.showOSD(ch, 0);
-    }
-
-    /* ══════════════════════════════════════════════════
        MINI PLAYER integration
     ══════════════════════════════════════════════════ */
     function initMiniPlayer() {
@@ -1011,8 +829,6 @@ const App = (() => {
                 btn.classList.add('active');
                 switch (screen) {
                     case 'channels':  UI.showScreen('main'); focusSidebar(); break;
-                    case 'vod':       openVODScreen();       break;
-                    case 'series':    openSeriesScreen();    break;
                     case 'epg':       openEPGScreen();       break;
                     case 'favorites': openFavoritesScreen(); break;
                     case 'history':   openHistoryScreen();   break;
@@ -1023,9 +839,7 @@ const App = (() => {
 
     /* Update handleKey to cover new screens */
     function _handleNewScreenKeys(screen, k, e) {
-        if (screen === 'favorites' || screen === 'history' ||
-            screen === 'vod' || screen === 'vod-detail' ||
-            screen === 'series' || screen === 'series-detail') {
+        if (screen === 'favorites' || screen === 'history') {
             if (k === Keys.BACK) {
                 e.preventDefault();
                 UI.showScreen('main');
