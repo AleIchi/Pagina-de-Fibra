@@ -6,6 +6,7 @@
     <title>IPTV Samsung</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/epg.css">
 </head>
 <body>
 
@@ -152,6 +153,19 @@
             </div>
             <div class="osd-channel-num" id="osd-channel-num"></div>
         </div>
+        <div class="osd-epg-info" id="osd-epg-info">
+            <div class="osd-epg-current">
+                <span class="epg-prog-label">AHORA</span>
+                <span class="osd-prog-title" id="osd-prog-title">-</span>
+                <div class="osd-prog-bar-wrap">
+                    <div class="osd-prog-bar" id="osd-prog-bar"></div>
+                </div>
+            </div>
+            <div class="osd-epg-next">
+                <span class="epg-prog-label">DESPUÉS</span>
+                <span class="osd-next-title" id="osd-next-title">-</span>
+            </div>
+        </div>
         <div class="osd-status" id="osd-status">
             <span class="status-dot live"></span> EN VIVO
         </div>
@@ -177,6 +191,8 @@
         <div class="message-text" id="message-text">Cargando...</div>
         <div class="message-sub" id="message-sub"></div>
     </div>
+
+    <div class="channel-number-indicator" id="channel-number-indicator"></div>
 
 </div>
 
@@ -223,6 +239,40 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
+     EPG SCREEN
+═══════════════════════════════════════════════════════ -->
+<div id="screen-epg" class="screen">
+  <div class="epg-header">
+    <button class="epg-back-btn" id="epg-back">← Volver</button>
+    <h1 class="epg-title">Guía de Programación</h1>
+    <div class="epg-date-nav">
+      <button class="epg-date-btn" id="epg-prev-day">◀ Ayer</button>
+      <span class="epg-current-date" id="epg-current-date"></span>
+      <button class="epg-date-btn" id="epg-next-day">Mañana ▶</button>
+    </div>
+    <div class="epg-legend">
+      <span class="legend-item current">■ Ahora</span>
+      <span class="legend-item future">■ Próximo</span>
+      <span class="legend-item past">■ Pasado</span>
+    </div>
+  </div>
+  <div class="epg-body">
+    <div class="epg-grid-wrap" id="epg-grid-wrap">
+      <!-- populated by EPGGrid -->
+    </div>
+  </div>
+  <!-- Program detail tooltip -->
+  <div class="epg-detail" id="epg-detail">
+    <div class="epg-detail-icon" id="epg-detail-icon"></div>
+    <div class="epg-detail-info">
+      <div class="epg-detail-title" id="epg-detail-title"></div>
+      <div class="epg-detail-time" id="epg-detail-time"></div>
+      <div class="epg-detail-desc" id="epg-detail-desc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
      TOAST NOTIFICATION
 ═══════════════════════════════════════════════════════ -->
 <div class="toast" id="toast"></div>
@@ -234,6 +284,8 @@
 <script src="js/xtream.js"></script>
 <script src="js/player.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/epg.js"></script>
+<script src="js/epg-grid.js"></script>
 <script src="js/app.js"></script>
 
 </body>

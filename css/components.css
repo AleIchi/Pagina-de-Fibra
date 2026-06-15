@@ -415,3 +415,48 @@
     outline: 3px solid var(--accent);
     outline-offset: 3px;
 }
+
+/* OSD EPG info */
+.osd-epg-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px 24px;
+    max-width: 600px;
+}
+.epg-prog-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-right: 12px;
+    letter-spacing: 1px;
+}
+.osd-prog-title, .osd-next-title {
+    font-size: 22px;
+    color: var(--text-primary);
+}
+.osd-next-title { color: var(--text-secondary); }
+.osd-prog-bar-wrap {
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+.osd-prog-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 1s linear;
+}
+.osd-epg-current, .osd-epg-next {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+

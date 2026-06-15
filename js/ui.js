@@ -171,9 +171,46 @@ const UI = (() => {
         if (channel.logo) { logo.src = channel.logo; logo.style.display = ''; }
         else { logo.style.display = 'none'; }
 
+        // Update EPG info if available
+        _updateOSDEPG(channel);
+
         osd.classList.add('visible');
         clearTimeout(_osdTimer);
         _osdTimer = setTimeout(() => osd.classList.remove('visible'), 5000);
+    }
+
+    function _updateOSDEPG(channel) {
+        const progTitleEl = document.getElementById('osd-prog-title');
+        const progBarEl   = document.getElementById('osd-prog-bar');
+        const nextTitleEl = document.getElementById('osd-next-title');
+        if (!progTitleEl) return;
+
+        // Try to find channel ID from tvgId or use channel name
+        const channelId = channel.tvgId || channel.id || channel.url;
+
+        let current = null;
+        let next    = null;
+        try {
+            if (typeof EPG !== 'undefined') {
+                current = EPG.getCurrentProgram(channelId);
+                next    = EPG.getNextProgram(channelId);
+            }
+        } catch (_) {}
+
+        if (current) {
+            progTitleEl.textContent = current.title || '-';
+            if (progBarEl) {
+                const pct = typeof EPG !== 'undefined' ? EPG.getProgressPercent(current) : 0;
+                progBarEl.style.width = pct + '%';
+            }
+        } else {
+            progTitleEl.textContent = '-';
+            if (progBarEl) progBarEl.style.width = '0%';
+        }
+
+        if (nextTitleEl) {
+            nextTitleEl.textContent = next ? (next.title || '-') : '-';
+        }
     }
 
     function hideOSD() {

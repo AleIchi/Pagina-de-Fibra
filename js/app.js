@@ -13,10 +13,13 @@ const App = (() => {
         activeChannel:   null,
         activeIndex:     0,
         searchQuery:     '',
-        focus:           'sidebar',   // 'sidebar' | 'channels' | 'setup' | 'player' | 'player-sidebar'
+        focus:           'sidebar',   // 'sidebar' | 'channels' | 'setup' | 'player' | 'player-sidebar' | 'epg'
         playerSidebarOpen: false,
         sourceType:      null,        // 'm3u' | 'xtream'
         setupTab:        'm3u',
+        numBuffer:       '',
+        numTimer:        null,
+        epgDate:         new Date(),
     };
 
     /* ── DOM References ─────────────────────────────── */
@@ -393,6 +396,7 @@ const App = (() => {
             case 'main':     handleMainKeys(k, e);  break;
             case 'player':   handlePlayerKeys(k, e); break;
             case 'settings': handleSettingsKeys(k, e); break;
+            case 'epg':      handleEPGKeys(k, e); break;
         }
     }
 
@@ -484,6 +488,10 @@ const App = (() => {
             state.focus = 'settings';
             UI.setFocus($('settings-back'));
         }
+
+        if (k === Keys.YELLOW) {
+            openEPGScreen();
+        }
     }
 
     /* Player screen keys */
@@ -492,6 +500,19 @@ const App = (() => {
 
         if (state.playerSidebarOpen) {
             handlePlayerSidebarKeys(k);
+            return;
+        }
+
+        // Number keys 0-9: accumulate into numBuffer
+        if (k >= Keys.NUM_0 && k <= Keys.NUM_9) {
+            const digit = k - Keys.NUM_0;
+            handleNumericInput(String(digit));
+            return;
+        }
+
+        // If digits buffered and ENTER pressed → navigate immediately
+        if (k === Keys.ENTER && state.numBuffer.length > 0) {
+            commitNumericInput();
             return;
         }
 
@@ -524,6 +545,55 @@ const App = (() => {
                     if (idx !== -1) toggleFavorite(idx);
                 }
                 break;
+            case Keys.YELLOW:
+                openEPGScreen();
+                break;
+        }
+    }
+
+    /* Numeric channel input */
+    function handleNumericInput(digit) {
+        // Clear previous timer
+        if (state.numTimer) {
+            clearTimeout(state.numTimer);
+            state.numTimer = null;
+        }
+
+        state.numBuffer += digit;
+
+        // Show / update indicator overlay
+        const indicator = $('channel-number-indicator');
+        if (indicator) {
+            indicator.textContent = state.numBuffer;
+            indicator.classList.add('show');
+        }
+
+        // Set 2s timer to auto-navigate
+        state.numTimer = setTimeout(() => {
+            commitNumericInput();
+        }, 2000);
+    }
+
+    function commitNumericInput() {
+        if (state.numTimer) {
+            clearTimeout(state.numTimer);
+            state.numTimer = null;
+        }
+
+        const num = parseInt(state.numBuffer, 10);
+        state.numBuffer = '';
+
+        // Hide indicator
+        const indicator = $('channel-number-indicator');
+        if (indicator) indicator.classList.remove('show');
+
+        if (isNaN(num) || num < 1) return;
+
+        const targetIdx = num - 1; // channel numbers are 1-based
+        if (targetIdx >= 0 && targetIdx < state.filteredChannels.length) {
+            playChannelByIndex(targetIdx);
+        } else {
+            UI.showToast('Canal ' + num + ' no encontrado', 2000);
         }
     }
 
@@ -540,6 +610,100 @@ const App = (() => {
         }
         if (k === Keys.BACK || k === Keys.RIGHT) {
             closePlayerSidebar();
+        }
+    }
+
+    /* ── EPG Screen ──────────────────────────────────── */
+    function openEPGScreen() {
+        state.epgDate = new Date();
+        state.focus   = 'epg';
+        UI.showScreen('epg');
+        initEPGScreen();
+    }
+
+    function initEPGScreen() {
+        // Bind back button
+        const backBtn = $('epg-back');
+        if (backBtn && !backBtn._bound) {
+            backBtn._bound = true;
+            backBtn.addEventListener('click', closeEPGScreen);
+        }
+
+        // Bind date nav buttons
+        const prevBtn = $('epg-prev-day');
+        if (prevBtn && !prevBtn._bound) {
+            prevBtn._bound = true;
+            prevBtn.addEventListener('click', () => {
+                state.epgDate.setDate(state.epgDate.getDate() - 1);
+                renderEPGGrid();
+            });
+        }
+        const nextBtn = $('epg-next-day');
+        if (nextBtn && !nextBtn._bound) {
+            nextBtn._bound = true;
+            nextBtn.addEventListener('click', () => {
+                state.epgDate.setDate(state.epgDate.getDate() + 1);
+                renderEPGGrid();
+            });
+        }
+
+        // Set up EPGGrid select callback
+        EPGGrid.onSelect = (channelId, program, channel) => {
+            // Find channel and play it
+            if (channel) {
+                const idx = state.filteredChannels.findIndex(
+                    ch => ch.url === channel.url);
+                if (idx !== -1) {
+                    playChannelByIndex(idx);
+                }
+            }
+        };
+
+        renderEPGGrid();
+    }
+
+    function renderEPGGrid() {
+        // Update date label
+        const dateEl = $('epg-current-date');
+        if (dateEl) {
+            dateEl.textContent = state.epgDate.toLocaleDateString('es-ES', {
+                weekday: 'long', day: 'numeric', month: 'long'
+            });
+        }
+
+        // Render grid with current channels and EPG data
+        const epgData = EPG.getData();
+        EPGGrid.render('epg-grid-wrap', state.filteredChannels, epgData || { channels: {}, programs: {} });
+    }
+
+    function closeEPGScreen() {
+        EPGGrid.destroy();
+        UI.showScreen('main');
+        state.focus = 'channels';
+        focusChannels();
+    }
+
+    function handleEPGKeys(k, e) {
+        e.preventDefault();
+        switch (k) {
+            case Keys.UP:
+                EPGGrid.navigateUp();
+                break;
+            case Keys.DOWN:
+                EPGGrid.navigateDown();
+                break;
+            case Keys.LEFT:
+                EPGGrid.navigateLeft();
+                break;
+            case Keys.RIGHT:
+                EPGGrid.navigateRight();
+                break;
+            case Keys.ENTER:
+                EPGGrid.selectCurrent();
+                break;
+            case Keys.BACK:
+                closeEPGScreen();
+                break;
         }
     }
 
