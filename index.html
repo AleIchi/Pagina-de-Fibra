@@ -179,10 +179,14 @@
             <span class="status-dot live"></span> EN VIVO
         </div>
         <div class="osd-hints">
-            <span>↑↓ Cambiar canal</span>
+            <span>↑↓ Canal</span>
             <span>← Lista</span>
-            <span>OK Info</span>
-            <span>BACK Salir</span>
+            <span>🟢 Fav</span>
+            <span>🔴 Audio</span>
+            <span>🔵 Subs</span>
+            <span>🟡 EPG</span>
+            <span>MENÚ Aspecto</span>
+            <span>BACK Mini</span>
         </div>
     </div>
 
@@ -226,6 +230,32 @@
                     <span class="settings-value" id="settings-channel-count">-</span>
                 </div>
                 <button class="settings-btn danger" id="btn-change-source">Cambiar fuente</button>
+            </div>
+            <div class="settings-section">
+                <h2>Reproducción</h2>
+                <div class="settings-row">
+                    <span class="settings-label">Temporizador de apagado</span>
+                    <span class="settings-value" id="settings-sleep-status">Desactivado</span>
+                </div>
+                <button class="settings-btn" id="btn-sleep-timer">⏱ Configurar temporizador</button>
+                <div class="settings-row">
+                    <span class="settings-label">Relación de aspecto</span>
+                    <span class="settings-value">MENÚ en reproductor para ciclar</span>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h2>Actualización automática</h2>
+                <div class="settings-row">
+                    <span class="settings-label">Intervalo</span>
+                    <span class="settings-value" id="settings-refresh-label">Manual</span>
+                </div>
+                <div class="settings-refresh-btns" id="settings-refresh-btns">
+                    <button class="settings-refresh-opt active" data-h="0">Manual</button>
+                    <button class="settings-refresh-opt" data-h="6">6 horas</button>
+                    <button class="settings-refresh-opt" data-h="12">12 horas</button>
+                    <button class="settings-refresh-opt" data-h="24">24 horas</button>
+                </div>
+                <button class="settings-btn" id="btn-refresh-now">↻ Actualizar ahora</button>
             </div>
             <div class="settings-section">
                 <h2>Caché y datos</h2>
@@ -344,6 +374,8 @@
 <script src="js/favorites.js"></script>
 <script src="js/history.js"></script>
 <script src="js/mini-player.js"></script>
+<script src="js/tracks.js"></script>
+<script src="js/player-extras.js"></script>
 <script src="js/app.js"></script>
 
 </body>

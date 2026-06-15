@@ -815,3 +815,28 @@ html, body {
     border-color: var(--live-red);
     background: rgba(239,68,68,0.08);
 }
+
+.settings-refresh-btns {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.settings-refresh-opt {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition), color var(--transition);
+}
+
+.settings-refresh-opt.active,
+.settings-refresh-opt:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(14,165,233,0.1);
+}

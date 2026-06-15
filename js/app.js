@@ -45,12 +45,42 @@ const App = (() => {
             renderMain();
             UI.showScreen('main');
             focusSidebar();
+            /* Silent background refresh */
+            _scheduleAutoRefresh(creds);
         } else if (creds) {
             await reconnectSource(creds);
         } else {
             UI.showScreen('setup');
             initSetupScreen();
         }
+    }
+
+    let _autoRefreshTimer = null;
+    function _scheduleAutoRefresh(creds) {
+        if (_autoRefreshTimer) clearTimeout(_autoRefreshTimer);
+        const intervalH = parseInt(Storage.getSetting('auto_refresh_hours') || '0', 10);
+        if (!intervalH) return;
+        _autoRefreshTimer = setTimeout(async () => {
+            try {
+                let channels;
+                if (creds.type === 'm3u') {
+                    const r = await M3UParser.fetchAndParse(creds.data.url);
+                    channels = r.channels;
+                } else {
+                    await Xtream.login(creds.data.server, creds.data.user, creds.data.pass);
+                    channels = await Xtream.getAllChannels();
+                }
+                const prev = state.allChannels.length;
+                Storage.saveChannels(channels);
+                state.allChannels = channels;
+                buildGroups();
+                filterChannels();
+                renderMain();
+                const diff = channels.length - prev;
+                if (diff > 0) UI.showToast(`Lista actualizada: +${diff} canales nuevos`);
+                _scheduleAutoRefresh(creds);
+            } catch (_) { _scheduleAutoRefresh(creds); }
+        }, intervalH * 3600000);
     }
 
     async function reconnectSource(creds) {
@@ -243,6 +273,7 @@ const App = (() => {
             });
         });
 
+        if (typeof AspectRatio !== 'undefined') AspectRatio.reset();
         Player.play(ch);
         UI.showScreen('player');
         state.focus = 'player';
@@ -303,6 +334,67 @@ const App = (() => {
             filterChannels();
             renderMain();
         });
+        if ($('btn-sleep-timer') && typeof SleepTimer !== 'undefined') {
+            $('btn-sleep-timer').addEventListener('click', () => {
+                SleepTimer.showModal();
+                _updateSleepStatus();
+            });
+        }
+
+        /* Auto-refresh settings */
+        const refreshBtns = document.querySelectorAll('.settings-refresh-opt');
+        const savedH = parseInt(Storage.getSetting('auto_refresh_hours') || '0', 10);
+        _updateRefreshLabel(savedH);
+        refreshBtns.forEach(btn => {
+            const h = parseInt(btn.dataset.h, 10);
+            btn.classList.toggle('active', h === savedH);
+            btn.addEventListener('click', () => {
+                Storage.setSetting('auto_refresh_hours', h);
+                refreshBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.h,10) === h));
+                _updateRefreshLabel(h);
+                const creds = Storage.getCredentials();
+                if (creds) _scheduleAutoRefresh(creds);
+                UI.showToast(h ? `Auto-refresh: cada ${h}h` : 'Auto-refresh desactivado');
+            });
+        });
+
+        if ($('btn-refresh-now')) {
+            $('btn-refresh-now').addEventListener('click', async () => {
+                const creds = Storage.getCredentials();
+                if (!creds) return;
+                UI.showToast('Actualizando lista...');
+                try {
+                    let channels;
+                    if (creds.type === 'm3u') {
+                        const r = await M3UParser.fetchAndParse(creds.data.url);
+                        channels = r.channels;
+                    } else {
+                        await Xtream.login(creds.data.server, creds.data.user, creds.data.pass);
+                        channels = await Xtream.getAllChannels();
+                    }
+                    Storage.saveChannels(channels);
+                    state.allChannels = channels;
+                    buildGroups(); filterChannels(); renderMain();
+                    UI.showToast(`Lista actualizada: ${channels.length} canales`);
+                } catch (e) {
+                    UI.showToast('Error al actualizar: ' + e.message, 4000);
+                }
+            });
+        }
+    }
+
+    function _updateRefreshLabel(h) {
+        const el = $('settings-refresh-label');
+        if (!el) return;
+        el.textContent = h ? `Cada ${h} horas` : 'Manual';
+    }
+
+    function _updateSleepStatus() {
+        const el = $('settings-sleep-status');
+        if (!el || typeof SleepTimer === 'undefined') return;
+        el.textContent = SleepTimer.isActive()
+            ? `${SleepTimer.remaining()} min restantes`
+            : 'Desactivado';
     }
 
     /* ── Favorites (toggle with GREEN button or long OK) ─ */
@@ -542,6 +634,27 @@ const App = (() => {
                 break;
             case Keys.YELLOW:
                 openEPGScreen();
+                break;
+            case Keys.RED:
+                if (typeof Tracks !== 'undefined') {
+                    Tracks.showTrackModal('audio', () => { state.focus = 'player'; });
+                }
+                break;
+            case Keys.BLUE:
+                if (typeof Tracks !== 'undefined') {
+                    Tracks.showTrackModal('subtitle', () => { state.focus = 'player'; });
+                }
+                break;
+            case Keys.CAPTION:
+                if (typeof Tracks !== 'undefined') {
+                    Tracks.showTrackModal('subtitle', () => { state.focus = 'player'; });
+                }
+                break;
+            case Keys.MENU:
+                if (typeof AspectRatio !== 'undefined') {
+                    const ar = AspectRatio.cycle();
+                    if (typeof UI !== 'undefined') UI.showToast(`Aspecto: ${ar.label}`);
+                }
                 break;
         }
     }
