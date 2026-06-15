@@ -68,6 +68,10 @@ const Storage = (() => {
         },
         getRecent() { return get('recent', []); },
 
+        /* EPG URL */
+        saveEpgUrl(url) { set('epg_url', url); },
+        getEpgUrl()     { return get('epg_url', ''); },
+
         /* App settings */
         getSetting(key, fallback = null) { return get('setting_' + key, fallback); },
         setSetting(key, value)           { set('setting_' + key, value); },

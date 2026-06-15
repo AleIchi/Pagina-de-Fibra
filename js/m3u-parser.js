@@ -6,11 +6,14 @@ const M3UParser = (() => {
         const channels = [];
         const groups   = new Set();
         let current    = null;
+        let tvgUrl     = '';
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
-            if (line.startsWith('#EXTINF:')) {
+            if (i === 0 && line.startsWith('#EXTM3U')) {
+                tvgUrl = extractAttr(line, 'x-tvg-url') || extractAttr(line, 'url-tvg') || '';
+            } else if (line.startsWith('#EXTINF:')) {
                 current = parseExtInf(line);
             } else if (current && !line.startsWith('#')) {
                 current.url = line.trim();
@@ -22,7 +25,8 @@ const M3UParser = (() => {
 
         return {
             channels,
-            groups: Array.from(groups).sort()
+            groups: Array.from(groups).sort(),
+            tvgUrl,
         };
     }
 

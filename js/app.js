@@ -20,6 +20,8 @@ const App = (() => {
         numBuffer:       '',
         numTimer:        null,
         epgDate:         new Date(),
+        epgPrevScreen:   'main',
+        favFocus:        'sidebar',
     };
 
     /* ── DOM References ─────────────────────────────── */
@@ -45,8 +47,9 @@ const App = (() => {
             renderMain();
             UI.showScreen('main');
             focusSidebar();
-            /* Silent background refresh */
+            /* Silent background refresh + EPG */
             _scheduleAutoRefresh(creds);
+            _loadEPGBackground();
         } else if (creds) {
             await reconnectSource(creds);
         } else {
@@ -83,6 +86,18 @@ const App = (() => {
         }, intervalH * 3600000);
     }
 
+    async function _loadEPGBackground() {
+        const url = Storage.getEpgUrl();
+        if (!url || typeof EPG === 'undefined') return;
+        /* Only load if not already loaded */
+        if (EPG.getData()) return;
+        try {
+            UI.showToast('Cargando guía TV...', 2000);
+            await EPG.fetchAndParse(url);
+            UI.showToast('Guía TV cargada ✓');
+        } catch (_) { /* EPG is optional, fail silently */ }
+    }
+
     async function reconnectSource(creds) {
         try {
             /* Show skeleton while loading */
@@ -103,6 +118,7 @@ const App = (() => {
             filterChannels();
             renderMain();
             _scheduleAutoRefresh(creds);
+            _loadEPGBackground();
         } catch (e) {
             UI.showScreen('setup');
             initSetupScreen();
@@ -164,6 +180,17 @@ const App = (() => {
 
             if (!channels.length) throw new Error('No se encontraron canales');
 
+            /* Save EPG URL */
+            if (state.setupTab === 'm3u') {
+                const epgField = $('m3u-epg-url');
+                const epgUrl   = (epgField && epgField.value.trim()) || result.tvgUrl || '';
+                if (epgUrl) Storage.saveEpgUrl(epgUrl);
+            } else {
+                const xtreamCreds = creds.data;
+                const epgUrl = `${xtreamCreds.server}/xmltv.php?username=${encodeURIComponent(xtreamCreds.user)}&password=${encodeURIComponent(xtreamCreds.pass)}`;
+                Storage.saveEpgUrl(epgUrl);
+            }
+
             Storage.saveCredentials(creds.type, creds.data);
             Storage.saveChannels(channels);
             state.allChannels = channels;
@@ -178,6 +205,7 @@ const App = (() => {
             renderMain();
             UI.showScreen('main');
             focusSidebar();
+            _loadEPGBackground();
 
         } catch (e) {
             statusEl.className   = 'setup-status error';
@@ -273,6 +301,7 @@ const App = (() => {
     function playChannelByIndex(idx) {
         const ch = state.filteredChannels[idx];
         if (!ch) return;
+        if (typeof MiniPlayer !== 'undefined' && MiniPlayer.isVisible()) MiniPlayer.hide();
 
         state.activeChannel = ch;
         state.activeIndex   = idx;
@@ -504,7 +533,6 @@ const App = (() => {
             case 'settings':       handleSettingsKeys(k, e); break;
             case 'epg':            handleEPGKeys(k, e);      break;
             default:               _handleNewScreenKeys(screen, k, e); break;
-            case 'epg':      handleEPGKeys(k, e); break;
         }
     }
 
@@ -742,6 +770,7 @@ const App = (() => {
 
     /* ── EPG Screen ──────────────────────────────────── */
     function openEPGScreen() {
+        state.epgPrevScreen = UI.currentScreen();
         state.epgDate = new Date();
         state.focus   = 'epg';
         UI.showScreen('epg');
@@ -805,9 +834,14 @@ const App = (() => {
 
     function closeEPGScreen() {
         EPGGrid.destroy();
-        UI.showScreen('main');
-        state.focus = 'channels';
-        focusChannels();
+        if (state.epgPrevScreen === 'player') {
+            UI.showScreen('player');
+            state.focus = 'player';
+        } else {
+            UI.showScreen('main');
+            state.focus = 'channels';
+            focusChannels();
+        }
     }
 
     function handleEPGKeys(k, e) {
@@ -864,13 +898,19 @@ const App = (() => {
 
     function openFavoritesScreen() {
         UI.showScreen('favorites');
-        state.focus = 'favorites';
+        state.focus   = 'favorites';
+        state.favFocus = 'sidebar';
         _renderFavoritesScreen();
         $('fav-back').onclick = () => { UI.showScreen('main'); state.focus = 'sidebar'; focusSidebar(); };
         $('fav-view-list').onclick  = () => { _favViewMode = 'list';  _renderFavoritesScreen(); };
         $('fav-view-grid').onclick  = () => { _favViewMode = 'grid';  _renderFavoritesScreen(); };
         $('fav-view-list').classList.toggle('active', _favViewMode === 'list');
         $('fav-view-grid').classList.toggle('active', _favViewMode === 'grid');
+        /* Set initial focus on first folder */
+        setTimeout(() => {
+            const first = $('fav-folders') && $('fav-folders').querySelector('li');
+            if (first) { UI.setFocus(first); state.favFocus = 'sidebar'; }
+        }, 50);
     }
 
     function _renderFavoritesScreen() {
@@ -899,6 +939,7 @@ const App = (() => {
        HISTORY SCREEN
     ══════════════════════════════════════════════════ */
     let _histFilter = 'all';
+    let _histBound  = false;
 
     function openHistoryScreen() {
         UI.showScreen('history');
@@ -910,21 +951,32 @@ const App = (() => {
             _renderHistoryScreen();
             UI.showToast('Historial eliminado');
         };
-        document.querySelectorAll('.hist-filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                _histFilter = btn.dataset.filter;
-                document.querySelectorAll('.hist-filter-btn').forEach(b =>
-                    b.classList.toggle('active', b.dataset.filter === _histFilter));
-                _renderHistoryScreen();
+        if (!_histBound) {
+            _histBound = true;
+            document.querySelectorAll('.hist-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    _histFilter = btn.dataset.filter;
+                    document.querySelectorAll('.hist-filter-btn').forEach(b =>
+                        b.classList.toggle('active', b.dataset.filter === _histFilter));
+                    _renderHistoryScreen();
+                    /* Re-focus first item after filter change */
+                    const first = document.querySelector('#hist-body .hist-item');
+                    if (first) UI.setFocus(first);
+                });
             });
-        });
+        }
+        /* Set initial focus on first history item */
+        setTimeout(() => {
+            const first = document.querySelector('#hist-body .hist-item');
+            if (first) UI.setFocus(first);
+        }, 50);
     }
 
     function _renderHistoryScreen() {
         History.renderHistoryScreen('hist-body', _histFilter, item => {
             if (item.type === 'live') {
-                const idx = state.allChannels.findIndex(ch => ch.url === item.url);
-                if (idx !== -1) playChannelByIndex(idx);
+                const url = item.url || (item.channel && item.channel.url);
+                if (url) playChannelByUrl(url);
             }
         });
         History.renderStatsSection('hist-stats');
@@ -971,31 +1023,131 @@ const App = (() => {
 
     /* Update handleKey to cover new screens */
     function _handleNewScreenKeys(screen, k, e) {
-        if (screen === 'favorites' || screen === 'history') {
-            if (k === Keys.BACK) {
+        /* Mini player always gets priority when focused */
+        if (MiniPlayer.isFocused()) {
+            if (MiniPlayer.handleKey(k)) { e.preventDefault(); return; }
+        }
+
+        if (screen === 'favorites') {
+            _handleFavoritesKeys(k, e);
+        } else if (screen === 'history') {
+            _handleHistoryKeys(k, e);
+        }
+    }
+
+    function _handleFavoritesKeys(k, e) {
+        if (k === Keys.BACK) {
+            e.preventDefault();
+            UI.showScreen('main');
+            state.focus = 'sidebar';
+            focusSidebar();
+            return;
+        }
+        if (k === Keys.INFO && MiniPlayer.isVisible()) {
+            MiniPlayer.toggleFocus(); e.preventDefault(); return;
+        }
+
+        /* LEFT → focus folder sidebar, RIGHT → focus channel panel */
+        if (k === Keys.LEFT) {
+            state.favFocus = 'sidebar';
+            const first = $('fav-folders') && $('fav-folders').querySelector('li');
+            if (first) UI.setFocus(first);
+            e.preventDefault(); return;
+        }
+        if (k === Keys.RIGHT) {
+            state.favFocus = 'panel';
+            const first = $('fav-channel-container') &&
+                ($('fav-channel-container').querySelector('.fav-grid-item') ||
+                 $('fav-channel-container').querySelector('.fav-list-item'));
+            if (first) UI.setFocus(first);
+            e.preventDefault(); return;
+        }
+
+        if (state.favFocus === 'sidebar') {
+            const list = $('fav-folders');
+            if (list && UI.navigateList(list, k)) { e.preventDefault(); return; }
+            if (k === Keys.ENTER) {
+                const cur = UI.getFocused();
+                if (cur) cur.click();
                 e.preventDefault();
-                UI.showScreen('main');
-                state.focus = 'sidebar';
-                focusSidebar();
             }
-            /* Mini player toggle with INFO key */
-            if (k === Keys.INFO && MiniPlayer.isVisible()) {
-                MiniPlayer.toggleFocus();
+        } else {
+            /* Navigate items in channel panel */
+            const items = $('fav-channel-container') &&
+                Array.from($('fav-channel-container').querySelectorAll('.fav-grid-item, .fav-list-item'));
+            if (items && items.length) {
+                const focused = UI.getFocused();
+                const idx     = focused ? items.indexOf(focused) : -1;
+                if (k === Keys.UP || k === Keys.DOWN) {
+                    const next = k === Keys.UP
+                        ? Math.max(0, idx - 1)
+                        : Math.min(items.length - 1, idx + 1);
+                    UI.setFocus(items[next]);
+                    e.preventDefault(); return;
+                }
+                if (k === Keys.ENTER && focused) { focused.click(); e.preventDefault(); }
+                if (k === Keys.GREEN && focused) {
+                    /* Toggle favorite via context or direct */
+                    focused.click();
+                    e.preventDefault();
+                }
             }
-            if (MiniPlayer.isFocused()) {
-                MiniPlayer.handleKey(k);
-            }
+        }
+    }
+
+    function _handleHistoryKeys(k, e) {
+        if (k === Keys.BACK) {
+            e.preventDefault();
+            UI.showScreen('main');
+            state.focus = 'sidebar';
+            focusSidebar();
+            return;
+        }
+        if (k === Keys.INFO && MiniPlayer.isVisible()) {
+            MiniPlayer.toggleFocus(); e.preventDefault(); return;
+        }
+
+        const items = Array.from(document.querySelectorAll('#hist-body .hist-item'));
+        if (!items.length) return;
+
+        const focused = UI.getFocused();
+        const idx     = focused ? items.indexOf(focused) : -1;
+
+        if (k === Keys.UP) {
+            UI.setFocus(items[Math.max(0, idx - 1)]);
+            e.preventDefault();
+        } else if (k === Keys.DOWN) {
+            UI.setFocus(items[Math.min(items.length - 1, idx + 1)]);
+            e.preventDefault();
+        } else if (k === Keys.ENTER && focused) {
+            focused.click();
+            e.preventDefault();
+        } else if (k === Keys.LEFT || k === Keys.RIGHT) {
+            /* Cycle filter buttons */
+            const filters = Array.from(document.querySelectorAll('.hist-filter-btn'));
+            const curF    = filters.findIndex(b => b.classList.contains('active'));
+            const nextF   = k === Keys.LEFT
+                ? Math.max(0, curF - 1)
+                : Math.min(filters.length - 1, curF + 1);
+            filters[nextF].click();
+            e.preventDefault();
         }
     }
 
     /* Override BACK in player to show mini player instead of closing */
     function _handlePlayerBackWithMini(e) {
         e.preventDefault();
+        /* Clear numeric buffer */
+        if (state.numTimer) { clearTimeout(state.numTimer); state.numTimer = null; }
+        state.numBuffer = '';
+        const ind = $('channel-number-indicator');
+        if (ind) { ind.textContent = ''; ind.classList.remove('visible'); }
+
         if (state.activeChannel) {
-            /* Shrink to mini player */
+            /* Stop AVPlay before handing over to HTML5 mini player */
             MiniPlayer.setChannelList(state.filteredChannels, state.activeIndex);
+            Player.stop();
             MiniPlayer.show(state.activeChannel);
-            /* Keep AVPlay running; only switch to HTML5 for mini */
             UI.showScreen('main');
             state.focus = 'sidebar';
             focusSidebar();

@@ -45,7 +45,7 @@ function registerKeys() {
         'ChannelUp', 'ChannelDown', 'ColorF0Red', 'ColorF1Green',
         'ColorF2Yellow', 'ColorF3Blue', 'MediaPlayPause', 'MediaPlay',
         'MediaPause', 'MediaStop', 'MediaFastForward', 'MediaRewind',
-        'Info', 'Search', 'Caption'
+        'Info', 'Search', 'Caption', 'Menu'
     ];
     registerList.forEach(key => {
         try { tizen.tvinputdevice.registerKey(key); } catch (_) {}

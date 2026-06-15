@@ -65,6 +65,7 @@
     align-items: center;
     gap: 20px;
     background: rgba(0,0,0,0.6);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 16px;
@@ -94,6 +95,7 @@
 
 .osd-channel-num {
     background: rgba(0,0,0,0.7);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 12px;
@@ -140,6 +142,7 @@
     display: flex;
     gap: 32px;
     background: rgba(0,0,0,0.6);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 40px;
@@ -161,6 +164,7 @@
     width: 420px;
     height: 100%;
     background: rgba(13,13,13,0.96);
+    -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255,255,255,0.08);
     z-index: 20;
@@ -244,6 +248,7 @@
     align-items: center;
     justify-content: center;
     background: rgba(0,0,0,0.7);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     opacity: 0;
     pointer-events: none;
@@ -289,6 +294,7 @@
     bottom: 80px;
     right: 80px;
     background: rgba(0,0,0,0.85);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 2px solid var(--accent);
     border-radius: 16px;
@@ -422,6 +428,7 @@
     flex-direction: column;
     gap: 8px;
     background: rgba(0,0,0,0.6);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 12px;
@@ -469,6 +476,7 @@
     align-items: center;
     justify-content: center;
     background: rgba(0,0,0,0.65);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     animation: fadeIn 0.2s ease;
 }

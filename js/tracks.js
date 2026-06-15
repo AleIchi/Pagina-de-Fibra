@@ -37,6 +37,20 @@ const Tracks = (() => {
         return 0;
     }
 
+    function getCurrentSubtitleTrack() {
+        try {
+            if (typeof webapis !== 'undefined' && webapis.avplay) {
+                const tracks = webapis.avplay.getTrackInfo('TEXT');
+                if (!Array.isArray(tracks) || !tracks.length) return -1;
+                /* AVPlay doesn't have direct getCurrentStreamInfo for TEXT;
+                   iterate to find the active one via a separate query */
+                const cur = webapis.avplay.getCurrentStreamInfo();
+                if (cur && cur.type === 'TEXT') return cur.index;
+            }
+        } catch(_) {}
+        return -1;
+    }
+
     /* ── Subtitle tracks ─────────────────────────── */
     function getSubtitleTracks() {
         try {
@@ -73,7 +87,7 @@ const Tracks = (() => {
 
         const tracks  = type === 'audio' ? getAudioTracks() : getSubtitleTracks();
         const title   = type === 'audio' ? '🔊 Pista de audio' : '💬 Subtítulos';
-        const curIdx  = type === 'audio' ? getCurrentAudioTrack() : -1;
+        const curIdx  = type === 'audio' ? getCurrentAudioTrack() : getCurrentSubtitleTrack();
 
         if (!tracks.length) {
             if (typeof UI !== 'undefined') UI.showToast('No hay pistas disponibles');

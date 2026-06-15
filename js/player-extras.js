@@ -7,7 +7,7 @@ const AspectRatio = (() => {
     const MODES = [
         { id: 'FULL',      label: '16:9 Normal',  avplay: 'PLAYER_DISPLAY_MODE_FULL_SCREEN' },
         { id: 'LETTER',    label: '4:3 Pillarbox', avplay: 'PLAYER_DISPLAY_MODE_AUTO_FIT' },
-        { id: 'STRETCH',   label: 'Estirar',       avplay: 'PLAYER_DISPLAY_MODE_FULL_SCREEN' },
+        { id: 'STRETCH',   label: 'Estirar',       avplay: 'PLAYER_DISPLAY_MODE_LETTER_BOX' },
         { id: 'ZOOM',      label: 'Zoom',          avplay: 'PLAYER_DISPLAY_MODE_ZOOM' },
     ];
 
@@ -150,9 +150,9 @@ const SleepTimer = (() => {
 
         const keyHandler = (e) => {
             const k = e.keyCode;
-            if (k === 38) { setActive(Math.max(0, focusIdx - 1)); e.preventDefault(); }
-            if (k === 40) { setActive(Math.min(items.length - 1, focusIdx + 1)); e.preventDefault(); }
-            if (k === 13) {
+            if (k === Keys.UP)   { setActive(Math.max(0, focusIdx - 1)); e.preventDefault(); }
+            if (k === Keys.DOWN) { setActive(Math.min(items.length - 1, focusIdx + 1)); e.preventDefault(); }
+            if (k === Keys.ENTER) {
                 const val = parseInt(items[focusIdx].dataset.val, 10);
                 if (val === 0) {
                     cancel();
@@ -164,7 +164,7 @@ const SleepTimer = (() => {
                 close();
                 e.preventDefault();
             }
-            if (k === 10009) { close(); e.preventDefault(); }
+            if (k === Keys.BACK) { close(); e.preventDefault(); }
         };
 
         document.addEventListener('keydown', keyHandler);
